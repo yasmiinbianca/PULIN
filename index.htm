@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pulin — Cadastro gamificado</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --bg-deep:#120B27;
+    --bg-deep-2:#1A1140;
+    --panel:rgba(255,255,255,0.05);
+    --panel-border:rgba(255,255,255,0.09);
+    --neon-1:#9B6BFF;
+    --neon-2:#5EE6FF;
+    --text-1:#F4F0FF;
+    --text-2:#A89CD0;
+    --text-3:#6E6394;
+    --success:#4ADE80;
+    --warn:#F5A623;
+    --danger:#FF6B81;
+
+    --sky-top:#86D6F2;
+    --sky-bottom:#3F9FD6;
+    --grass:#6FCB6B;
+    --grass-dark:#4F9E4D;
+    --dirt:#A9784B;
+    --gold-1:#FFE082;
+    --gold-2:#F5A623;
+    --gold-3:#C97A1A;
+    --ball-1:#A78BFA;
+    --ball-2:#7C3AED;
+
+    --world-height:1560px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:'Plus Jakarta Sans', sans-serif;
+    background:var(--bg-deep);
+    color:var(--text-1);
+    overflow:hidden;
+  }
+  button{font-family:inherit;}
+
+  .app{
+    display:flex;
+    height:100vh;
+    width:100vw;
+  }
+
+  /* ===================== LEFT — FORM ===================== */
+  .panel-form{
+    flex:0 0 44%;
+    max-width:600px;
+    min-width:380px;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:40px 52px 32px;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(155,107,255,0.18), transparent 55%),
+      radial-gradient(circle at 90% 100%, rgba(94,230,255,0.10), transparent 50%),
+      linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-deep-2) 100%);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    margin-bottom:30px;
+  }
+  .brand-mark{
+    width:34px;height:34px;border-radius:11px;
+    background:linear-gradient(135deg, var(--neon-1), var(--neon-2));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 16px rgba(155,107,255,0.45);
+    flex-shrink:0;
+  }
+  .brand-mark svg{width:18px;height:18px;}
+  .brand-name{font-family:'Fredoka',sans-serif;font-size:19px;font-weight:600;letter-spacing:0.2px;}
+  .brand-tag{font-size:11.5px;color:var(--text-3);margin-top:-2px;}
+
+  /* progress */
+  .progress{
+    display:flex;
+    align-items:flex-start;
+    margin-bottom:34px;
+  }
+  .progress-step{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    position:relative;
+    flex:1;
+  }
+  .progress-line{
+    position:absolute;
+    top:14px; left:50%; right:-50%;
+    height:3px;
+    background:rgba(255,255,255,0.09);
+    z-index:0;
+  }
+  .progress-step:last-child .progress-line{display:none;}
+  .progress-line-fill{
+    position:absolute; top:0; left:0; height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--neon-1), var(--neon-2));
+    transition:width .5s ease;
+  }
+  .progress-dot{
+    width:28px;height:28px;border-radius:50%;
+    background:rgba(255,255,255,0.06);
+    border:2px solid rgba(255,255,255,0.16);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;color:var(--text-3);
+    z-index:1; transition:all .35s ease;
+  }
+  .progress-step.done .progress-dot{
+    background:linear-gradient(135deg, var(--neon-1), var(--neon-2));
+    border-color:transparent;color:#16092E;
+    box-shadow:0 0 0 4px rgba(155,107,255,0.18);
+  }
+  .progress-step.current .progress-dot{
+    border-color:var(--neon-2);
+    color:var(--text-1);
+    box-shadow:0 0 0 5px rgba(94,230,255,0.15);
+    animation:pulseDot 1.6s ease-in-out infinite;
+  }
+  @keyframes pulseDot{0%,100%{box-shadow:0 0 0 5px rgba(94,230,255,0.15);}50%{box-shadow:0 0 0 9px rgba(94,230,255,0.06);}}
+  .progress-label{font-size:10.5px;color:var(--text-3);margin-top:7px;text-align:center;max-width:64px;line-height:1.2;}
+  .progress-step.current .progress-label{color:var(--text-1);}
+
+  /* card */
+  .card-wrap{flex:1;display:flex;flex-direction:column;min-height:0;}
+  .card{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:22px;
+    padding:30px 30px 26px;
+    backdrop-filter:blur(14px);
+    box-shadow:0 18px 40px rgba(0,0,0,0.35);
+    position:relative;
+  }
+  .back-btn{
+    position:absolute; top:22px; left:22px;
+    width:30px;height:30px;border-radius:50%;
+    background:rgba(255,255,255,0.06);
+    border:1px solid var(--panel-border);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer; color:var(--text-2);
+    transition:background .2s;
+  }
+  .back-btn:hover{background:rgba(255,255,255,0.12);}
+  .back-btn svg{width:14px;height:14px;}
+  .back-btn.hidden{visibility:hidden;}
+
+  .step-title{font-family:'Fredoka',sans-serif;font-size:23px;font-weight:600;margin:0 0 6px;}
+  .step-sub{font-size:13.5px;color:var(--text-2);margin:0 0 22px;line-height:1.5;}
+
+  .field-label{font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:block;}
+  .input{
+    width:100%;
+    background:rgba(255,255,255,0.04);
+    border:1.5px solid var(--panel-border);
+    border-radius:13px;
+    padding:13px 16px;
+    color:var(--text-1);
+    font-size:14.5px;
+    outline:none;
+    transition:border-color .2s, background .2s;
+  }
+  .input::placeholder{color:var(--text-3);}
+  .input:focus{border-color:var(--neon-2);background:rgba(255,255,255,0.07);}
+  .input-row{position:relative;}
+  .input-hint{font-size:12px;margin-top:8px;display:flex;align-items:center;gap:6px;color:var(--text-3);min-height:16px;}
+  .input-hint.ok{color:var(--success);}
+  .input-hint svg{width:13px;height:13px;}
+
+  .pw-toggle{
+    position:absolute; right:14px; top:50%; transform:translateY(-50%);
+    background:none;border:none;color:var(--text-3);cursor:pointer;font-size:11.5px;font-weight:700;
+  }
+  .pw-meter{height:5px;border-radius:4px;background:rgba(255,255,255,0.08);margin-top:12px;overflow:hidden;}
+  .pw-meter-fill{height:100%;width:0%;border-radius:4px;transition:width .3s,background .3s;}
+
+  /* method grid */
+  .method-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .method-card{
+    display:flex;align-items:center;gap:10px;
+    padding:13px 14px;border-radius:14px;
+    background:rgba(255,255,255,0.04);
+    border:1.5px solid var(--panel-border);
+    cursor:pointer; transition:border-color .2s, background .2s, transform .15s;
+    position:relative;
+  }
+  .method-card:hover{background:rgba(255,255,255,0.07);transform:translateY(-1px);}
+  .method-card.selected{border-color:var(--neon-2);background:rgba(94,230,255,0.08);}
+  .method-icon{width:30px;height:30px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .method-name{font-size:13.5px;font-weight:600;}
+  .method-check{
+    position:absolute; top:8px; right:8px; width:16px;height:16px;border-radius:50%;
+    background:var(--neon-2); display:none; align-items:center;justify-content:center;
+  }
+  .method-card.selected .method-check{display:flex;}
+  .method-check svg{width:9px;height:9px;}
+
+  /* avatar */
+  .avatar-row{display:flex;align-items:center;gap:18px;margin-bottom:18px;}
+  .avatar-preview{
+    width:70px;height:70px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0; border:2.5px solid var(--neon-2);
+    box-shadow:0 0 0 5px rgba(94,230,255,0.12);
+    background-size:cover;background-position:center;
+    overflow:hidden;
+  }
+  .avatar-preview svg{width:34px;height:34px;}
+  .upload-btn{
+    font-size:12.5px;font-weight:700;color:var(--neon-2);
+    background:rgba(94,230,255,0.08);border:1px solid rgba(94,230,255,0.25);
+    padding:9px 14px;border-radius:10px;cursor:pointer;
+  }
+  .upload-hint{font-size:11.5px;color:var(--text-3);margin-top:6px;}
+  .avatar-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+  .avatar-option{
+    width:100%;aspect-ratio:1;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    border:2.5px solid transparent; transition:border-color .2s, transform .15s;
+  }
+  .avatar-option:hover{transform:scale(1.06);}
+  .avatar-option.selected{border-color:var(--neon-2);}
+  .avatar-option svg{width:60%;height:60%;}
+
+  /* nickname optional pill */
+  .opt-pill{
+    display:inline-block;font-size:10.5px;font-weight:700;color:var(--text-3);
+    background:rgba(255,255,255,0.06);padding:3px 9px;border-radius:20px;margin-left:8px;
+    text-transform:uppercase;letter-spacing:0.04em;
+  }
+
+  .actions{display:flex;align-items:center;gap:16px;margin-top:24px;}
+  .btn-continue{
+    flex:1;
+    background:linear-gradient(120deg, var(--neon-1), var(--neon-2));
+    border:none;color:#16092E;font-weight:700;font-size:14.5px;
+    padding:14px 0;border-radius:14px;cursor:pointer;
+    box-shadow:0 10px 24px rgba(155,107,255,0.35);
+    transition:transform .15s, box-shadow .15s, opacity .2s;
+  }
+  .btn-continue:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 28px rgba(155,107,255,0.45);}
+  .btn-continue:disabled{opacity:0.35;cursor:not-allowed;box-shadow:none;}
+
+  .footer-note{font-size:12.5px;color:var(--text-3);text-align:center;margin:18px 0 0;}
+  .footer-note a{color:var(--neon-2);text-decoration:none;font-weight:700;}
+
+  /* ===================== RIGHT — GAME ===================== */
+  .panel-game{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
+  }
+  .stage-frame{
+    position:absolute; inset:18px;
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25), inset 0 30px 70px rgba(0,0,0,0.12), inset 0 -40px 90px rgba(0,0,0,0.18);
+  }
+
+  .hud{
+    position:absolute; top:24px; left:24px; right:24px; z-index:30;
+    display:flex; justify-content:space-between; align-items:center; pointer-events:none;
+  }
+  .hud-chip{
+    display:flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,0.85);
+    padding:8px 14px;border-radius:30px;
+    box-shadow:0 6px 16px rgba(0,0,0,0.18);
+    font-weight:800; font-size:13px; color:#3B2A14;
+  }
+  .hud-coin{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%, var(--gold-1), var(--gold-2) 60%, var(--gold-3));box-shadow:0 0 0 2px rgba(255,255,255,0.6) inset;flex-shrink:0;}
+  #coinCount{transition:transform .2s;}
+
+  .clouds{position:absolute; inset:0; z-index:1; pointer-events:none;}
+  .cloud{
+    position:absolute; background:rgba(255,255,255,0.85); border-radius:60px;
+    filter:blur(0.3px);
+  }
+  .cloud::before, .cloud::after{
+    content:''; position:absolute; background:rgba(255,255,255,0.85); border-radius:50%;
+  }
+
+  .world{
+    position:absolute; left:0; right:0; bottom:0;
+    height:var(--world-height);
+    transition:transform .85s cubic-bezier(.34,1.1,.4,1);
+    z-index:2;
+  }
+
+  .platform{
+    position:absolute;
+    width:128px; height:30px;
+    border-radius:60px;
+    background:linear-gradient(180deg, var(--grass) 0 54%, var(--dirt) 54% 100%);
+    box-shadow:0 8px 0 rgba(0,0,0,0.10), 0 16px 22px rgba(0,0,0,0.22);
+    transform:translateX(-50%);
+  }
+  .platform::before{
+    content:''; position:absolute; top:0; left:10%; width:80%; height:7px; border-radius:30px;
+    background:rgba(255,255,255,0.30);
+  }
+  .platform.ground{width:150px;background:linear-gradient(180deg, #7FD17B 0 54%, #9C6E40 54% 100%);}
+
+  .coin{
+    position:absolute; width:26px;height:26px; border-radius:50%; transform:translateX(-50%);
+    background:radial-gradient(circle at 35% 28%, var(--gold-1), var(--gold-2) 58%, var(--gold-3));
+    box-shadow:0 0 0 2px rgba(255,255,255,0.45) inset, 0 4px 8px rgba(0,0,0,0.25);
+    animation:coinFloat 1.8s ease-in-out infinite;
+    transition:opacity .3s, transform .3s;
+  }
+  .coin.collected{opacity:0; transform:translateX(-50%) translateY(-30px) scale(0.4); pointer-events:none;}
+  @keyframes coinFloat{0%,100%{margin-top:0;}50%{margin-top:-6px;}}
+
+  .chest{
+    position:absolute; width:96px; height:78px; transform:translateX(-50%);
+  }
+  .chest-glow{
+    position:absolute; left:50%; top:50%; width:230px;height:230px;
+    transform:translate(-50%,-55%);
+    background:radial-gradient(circle, rgba(255,224,130,0.55), rgba(255,224,130,0) 70%);
+    animation:chestPulse 2.4s ease-in-out infinite;
+    z-index:-1;
+  }
+  @keyframes chestPulse{0%,100%{opacity:0.55;}50%{opacity:0.95;}}
+  .chest-base{
+    position:absolute; bottom:0; left:0; width:100%; height:52px;
+    background:linear-gradient(180deg, var(--gold-2), var(--gold-3));
+    border-radius:0 0 14px 14px;
+    box-shadow:inset 0 -8px 0 rgba(0,0,0,0.12), 0 10px 18px rgba(0,0,0,0.3);
+  }
+  .chest-base::before{
+    content:''; position:absolute; left:0;right:0;top:14px; height:4px; background:rgba(0,0,0,0.18);
+  }
+  .chest-lid{
+    position:absolute; top:0; left:0; width:100%; height:38px;
+    background:linear-gradient(180deg, var(--gold-1), var(--gold-2));
+    border-radius:14px 14px 6px 6px;
+    transform-origin:bottom center;
+    box-shadow:0 6px 10px rgba(0,0,0,0.2);
+    transition:transform .55s cubic-bezier(.34,1.56,.64,1);
+    z-index:2;
+  }
+  .chest.open .chest-lid{transform:rotateX(-115deg) translateY(-4px);}
+  .chest-lock{
+    position:absolute; left:50%; top:34px; width:16px;height:18px; transform:translateX(-50%);
+    background:linear-gradient(180deg,#FFE8A3,#E8941A); border-radius:4px; z-index:3;
+    box-shadow:0 2px 4px rgba(0,0,0,0.3);
+  }
+  .chest-sparkle{
+    position:absolute; left:50%; top:10%; width:6px;height:6px; border-radius:50%;
+    background:#FFF6D8; opacity:0; pointer-events:none;
+  }
+
+  .ball-pos{
+    position:absolute; width:0; height:0; z-index:20;
+    transition: bottom .8s cubic-bezier(.34,1.1,.4,1), left .8s cubic-bezier(.34,1.1,.4,1);
+  }
+  .ball-body{
+    position:absolute; left:50%; bottom:0; transform:translate(-50%, 0);
+    width:64px; height:64px; border-radius:50%;
+    background:radial-gradient(circle at 35% 28%, #C4A8FF 0%, var(--ball-1) 45%, var(--ball-2) 100%);
+    box-shadow:0 10px 18px rgba(0,0,0,0.28), inset 0 -6px 10px rgba(60,20,120,0.35);
+    animation:ballIdle 2.1s ease-in-out infinite;
+  }
+  @keyframes ballIdle{0%,100%{transform:translate(-50%,0) scaleY(1);}50%{transform:translate(-50%,-7px) scaleY(1.04);}}
+  .ball-body.hopping{animation:ballHop .8s ease;}
+  @keyframes ballHop{
+    0%{transform:translate(-50%,0) scale(1,1) rotate(0deg);}
+    18%{transform:translate(-50%,4px) scale(1.16,0.82) rotate(-4deg);}
+    45%{transform:translate(-50%,-78px) scale(0.92,1.1) rotate(8deg);}
+    70%{transform:translate(-50%,-20px) scale(1.05,0.95) rotate(-3deg);}
+    88%{transform:translate(-50%,3px) scale(1.12,0.88) rotate(2deg);}
+    100%{transform:translate(-50%,0) scale(1,1) rotate(0deg);}
+  }
+  .ball-eye{position:absolute; width:15px;height:18px; background:#fff; border-radius:50%; top:18px;}
+  .ball-eye.left{left:13px;} .ball-eye.right{left:34px;}
+  .ball-eye::after{content:'';position:absolute; width:7px;height:7px;background:#241236;border-radius:50%; top:6px; left:4px;}
+  .ball-blush{position:absolute; width:9px;height:6px; background:#FF9FC2; border-radius:50%; opacity:0.7; top:34px;}
+  .ball-blush.left{left:6px;} .ball-blush.right{left:46px;}
+  .ball-mouth{position:absolute; width:12px;height:6px; border-radius:0 0 12px 12px; background:#3B2160; top:39px; left:50%; transform:translateX(-50%);}
+
+  .particles{position:absolute; inset:0; pointer-events:none; z-index:25; overflow:hidden;}
+  .spark{
+    position:absolute; width:6px;height:6px; border-radius:50%; background:var(--gold-1);
+    animation:sparkFly .7s ease-out forwards;
+  }
+  @keyframes sparkFly{
+    0%{opacity:1; transform:translate(0,0) scale(1);}
+    100%{opacity:0; transform:translate(var(--sx), var(--sy)) scale(0.3);}
+  }
+  .float-text{
+    position:absolute; font-weight:800; font-size:14px; color:#FFD24A;
+    text-shadow:0 2px 4px rgba(0,0,0,0.3);
+    animation:floatUp 1s ease-out forwards;
+  }
+  @keyframes floatUp{0%{opacity:1; transform:translateY(0);}100%{opacity:0;transform:translateY(-46px);}}
+
+  /* completion overlay */
+  .complete-overlay{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(8,4,20,0.62);
+    backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden; transition:opacity .4s;
+  }
+  .complete-overlay.show{opacity:1; visibility:visible;}
+  .complete-card{
+    background:linear-gradient(160deg, #1F1545, #14102F);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:26px; padding:40px 44px 34px; text-align:center;
+    max-width:380px;
+    box-shadow:0 30px 70px rgba(0,0,0,0.55);
+    transform:translateY(14px) scale(0.96); transition:transform .4s;
+  }
+  .complete-overlay.show .complete-card{transform:translateY(0) scale(1);}
+  .complete-icon{
+    width:84px;height:84px;border-radius:50%; margin:0 auto 18px;
+    background:radial-gradient(circle, var(--gold-1), var(--gold-2) 70%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 10px rgba(245,166,35,0.14);
+    font-size:38px;
+  }
+  .complete-title{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:600;margin:0 0 8px;}
+  .complete-sub{font-size:13.5px;color:var(--text-2);margin:0 0 22px;line-height:1.5;}
+  .reward-chip{
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(94,230,255,0.08); border:1px solid rgba(94,230,255,0.25);
+    color:var(--neon-2); font-weight:700; font-size:12.5px;
+    padding:8px 14px; border-radius:30px; margin-bottom:22px;
+  }
+  .btn-restart{
+    width:100%; background:linear-gradient(120deg, var(--neon-1), var(--neon-2));
+    border:none;color:#16092E;font-weight:700;font-size:14px;padding:13px 0;
+    border-radius:13px;cursor:pointer;
+  }
+  .confetti-layer{position:fixed; inset:0; z-index:99; pointer-events:none; overflow:hidden;}
+  .confetti{position:absolute; top:-20px; opacity:0.95; animation:confettiFall linear forwards;}
+  @keyframes confettiFall{
+    to{transform:translateY(110vh) rotate(540deg); opacity:0.2;}
+  }
+
+  @media (max-width:900px){
+    .app{flex-direction:column;}
+    .panel-form{flex:1; min-width:0; max-width:none; padding:26px 22px 22px; overflow-y:auto;}
+    .panel-game{flex:0 0 280px;}
+    .progress-label{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===================== LEFT: FORM ===================== -->
+  <section class="panel-form">
+    <div>
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 17L9 9L13 14L20 5" stroke="#16092E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="brand-name">Pulin</div>
+          <div class="brand-tag">cadastro que vira jogo</div>
+        </div>
+      </div>
+
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="card-wrap">
+      <div class="card" id="card"></div>
+    </div>
+
+    <p class="footer-note">Já tem conta? <a href="#">Entrar</a></p>
+  </section>
+
+  <!-- ===================== RIGHT: GAME ===================== -->
+  <section class="panel-game">
+    <div class="stage-frame">
+      <div class="hud">
+        <div class="hud-chip">Etapa <span id="stepHud">1</span>/5</div>
+        <div class="hud-chip"><span class="hud-coin"></span><span id="coinCount">0</span></div>
+      </div>
+
+      <div class="clouds" id="clouds"></div>
+
+      <div class="world" id="world">
+        <div class="chest" id="chest" style="bottom:1460px; left:50%;">
+          <div class="chest-glow"></div>
+          <div class="chest-lid"></div>
+          <div class="chest-lock"></div>
+          <div class="chest-base"></div>
+        </div>
+
+        <div class="platform" style="bottom:1320px; left:56%;" data-platform="5"></div>
+        <div class="coin" id="coin5" style="bottom:1356px; left:56%;"></div>
+
+        <div class="platform" style="bottom:1100px; left:30%;" data-platform="4"></div>
+        <div class="coin" id="coin4" style="bottom:1136px; left:30%;"></div>
+
+        <div class="platform" style="bottom:840px; left:62%;" data-platform="3"></div>
+        <div class="coin" id="coin3" style="bottom:876px; left:62%;"></div>
+
+        <div class="platform" style="bottom:580px; left:26%;" data-platform="2"></div>
+        <div class="coin" id="coin2" style="bottom:616px; left:26%;"></div>
+
+        <div class="platform" style="bottom:320px; left:58%;" data-platform="1"></div>
+        <div class="coin" id="coin1" style="bottom:356px; left:58%;"></div>
+
+        <div class="platform ground" style="bottom:60px; left:38%;"></div>
+
+        <div class="ball-pos" id="ballPos" style="bottom:90px; left:38%;">
+          <div class="ball-body" id="ballBody">
+            <div class="ball-eye left"></div>
+            <div class="ball-eye right"></div>
+            <div class="ball-blush left"></div>
+            <div class="ball-blush right"></div>
+            <div class="ball-mouth"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="particles" id="particles"></div>
+    </div>
+  </section>
+</div>
+
+<div class="complete-overlay" id="completeOverlay">
+  <div class="complete-card">
+    <div class="complete-icon">🎉</div>
+    <h2 class="complete-title">Cadastro concluído!</h2>
+    <p class="complete-sub">Você desbloqueou sua recompensa de boas-vindas.</p>
+    <div class="reward-chip"><span class="hud-coin"></span> +500 moedas &nbsp;·&nbsp; avatar exclusivo</div>
+    <button class="btn-restart" id="restartBtn">Reiniciar demonstração</button>
+  </div>
+</div>
+<div class="confetti-layer" id="confettiLayer"></div>
+
+<script>
+/* ============== DATA ============== */
+const STEPS = [
+  {id:1, title:'Como você quer continuar?', sub:'Escolha como prefere entrar no Pulin.', type:'method'},
+  {id:2, title:'Escolha seu nome de usuário', sub:'É assim que as outras pessoas vão te encontrar.', type:'username'},
+  {id:3, title:'Escolha uma foto de perfil', sub:'Você pode trocar isso quando quiser depois.', type:'avatar'},
+  {id:4, title:'Crie uma senha', sub:'Use pelo menos 6 caracteres para sua segurança.', type:'password'},
+  {id:5, title:'Apelido', sub:'Como os amigos te chamam? Isso é opcional.', type:'nickname'},
+];
+const PROGRESS_LABELS = ['Método','Usuário','Foto','Senha','Apelido'];
+
+const AVATARS = [
+  {a:'#FFB199',b:'#E8714A'}, {a:'#9BE7C4',b:'#3FA882'}, {a:'#A8C8FF',b:'#5B7FE0'},
+  {a:'#FFD37A',b:'#E8A23A'}, {a:'#D5A8FF',b:'#8A4FE0'}, {a:'#FF9FC2',b:'#E0568F'},
+];
+
+function avatarFaceSvg(){
+  return '<svg viewBox="0 0 100 100"><circle cx="34" cy="42" r="8" fill="#241236"/><circle cx="66" cy="42" r="8" fill="#241236"/><path d="M32 62 Q50 76 68 62" stroke="#241236" stroke-width="6" fill="none" stroke-linecap="round"/></svg>';
+}
+
+/* icons for login methods */
+const METHOD_ICONS = {
+  google: '<div class="method-icon" style="background:#fff;"><svg viewBox="0 0 24 24" width="16" height="16"><text x="3.5" y="17" font-family="Arial" font-weight="700" font-size="15" fill="#4285F4">G</text></svg></div>',
+  facebook: '<div class="method-icon" style="background:#3B5BFF;"><svg viewBox="0 0 24 24" width="16" height="16"><text x="6.5" y="17" font-family="Arial" font-weight="700" font-size="15" fill="#fff">f</text></svg></div>',
+  phone: '<div class="method-icon" style="background:rgba(74,222,128,0.16);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8z" fill="#4ADE80"/></svg></div>',
+  email: '<div class="method-icon" style="background:rgba(94,230,255,0.16);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M3 6h18v12H3z" stroke="#5EE6FF" stroke-width="1.6"/><path d="M3 7l9 6 9-6" stroke="#5EE6FF" stroke-width="1.6" fill="none"/></svg></div>',
+};
+
+/* ============== STATE ============== */
+let state = {
+  step:1,
+  method:null,
+  username:'',
+  avatarIndex:0,
+  avatarPhoto:null,
+  password:'',
+  nickname:'',
+  coins:0,
+};
+
+const PLATFORM_Y = {0:60, 1:320, 2:580, 3:840, 4:1100, 5:1320, chest:1460};
+const PLATFORM_X = {0:'38%', 1:'58%', 2:'26%', 3:'62%', 4:'30%', 5:'56%', chest:'50%'};
+
+/* ============== RENDER: PROGRESS ============== */
+function renderProgress(){
+  const wrap = document.getElementById('progress');
+  wrap.innerHTML = '';
+  STEPS.forEach((s, i)=>{
+    const n = i+1;
+    const div = document.createElement('div');
+    div.className = 'progress-step' + (n < state.step ? ' done' : n === state.step ? ' current' : '');
+    const fillPct = n < state.step ? 100 : 0;
+    div.innerHTML = `
+      <div class="progress-dot">${n < state.step ? checkSvg() : n}</div>
+      <div class="progress-label">${PROGRESS_LABELS[i]}</div>
+      <div class="progress-line"><div class="progress-line-fill" style="width:${fillPct}%"></div></div>
+    `;
+    wrap.appendChild(div);
+  });
+}
+function checkSvg(){
+  return '<svg viewBox="0 0 24 24" width="12" height="12" fill="none"><path d="M5 13l4 4L19 7" stroke="#16092E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+/* ============== RENDER: CARD ============== */
+function renderCard(){
+  const s = STEPS[state.step-1];
+  const card = document.getElementById('card');
+  let inner = `<button class="back-btn ${state.step===1?'hidden':''}" id="backBtn">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <h2 class="step-title">${s.title}${s.type==='nickname' ? '<span class="opt-pill">opcional</span>' : ''}</h2>
+    <p class="step-sub">${s.sub}</p>`;
+
+  if(s.type === 'method'){
+    inner += `<div class="method-grid">
+      ${methodCard('google','Google')}
+      ${methodCard('facebook','Facebook')}
+      ${methodCard('phone','Telefone')}
+      ${methodCard('email','E-mail')}
+    </div>`;
+  } else if(s.type === 'username'){
+    inner += `
+      <span class="field-label">Nome de usuário</span>
+      <div class="input-row">
+        <input class="input" id="usernameInput" maxlength="20" placeholder="ex: luna_pula" value="${state.username}" autocomplete="off"/>
+      </div>
+      <div class="input-hint" id="usernameHint">Mínimo de 3 caracteres.</div>
+    `;
+  } else if(s.type === 'avatar'){
+    inner += `
+      <div class="avatar-row">
+        <div class="avatar-preview" id="avatarPreview"></div>
+        <div>
+          <button class="upload-btn" id="uploadBtn">Carregar foto</button>
+          <input type="file" id="fileInput" accept="image/*" style="display:none"/>
+          <div class="upload-hint">JPG ou PNG, até 5MB</div>
+        </div>
+      </div>
+      <span class="field-label">ou escolha um avatar</span>
+      <div class="avatar-grid" id="avatarGrid"></div>
+    `;
+  } else if(s.type === 'password'){
+    inner += `
+      <span class="field-label">Senha</span>
+      <div class="input-row">
+        <input class="input" id="passwordInput" type="password" maxlength="40" placeholder="Crie uma senha" value="${state.password}" autocomplete="new-password"/>
+        <button class="pw-toggle" id="pwToggle">MOSTRAR</button>
+      </div>
+      <div class="pw-meter"><div class="pw-meter-fill" id="pwMeterFill"></div></div>
+      <div class="input-hint" id="pwHint">Use letras, números e símbolos para mais força.</div>
+    `;
+  } else if(s.type === 'nickname'){
+    inner += `
+      <span class="field-label">Apelido</span>
+      <div class="input-row">
+        <input class="input" id="nicknameInput" maxlength="20" placeholder="ex: Pipoca" value="${state.nickname}" autocomplete="off"/>
+      </div>
+      <div class="input-hint">Pode deixar em branco e ajustar depois.</div>
+    `;
+  }
+
+  inner += `<div class="actions">
+    <button class="btn-continue" id="continueBtn">${s.id===5 ? 'Concluir' : 'Continuar'}</button>
+  </div>`;
+
+  card.innerHTML = inner;
+  bindCardEvents(s.type);
+  updateContinueState();
+}
+
+function methodCard(key, label){
+  const selected = state.method === key ? ' selected' : '';
+  return `<div class="method-card${selected}" data-method="${key}">
+      ${METHOD_ICONS[key]}
+      <span class="method-name">${label}</span>
+      <div class="method-check">${checkSvg()}</div>
+    </div>`;
+}
+
+/* ============== EVENTS PER STEP ============== */
+function bindCardEvents(type){
+  document.getElementById('backBtn').onclick = ()=>{ if(state.step>1){ state.step--; renderAll(); } };
+  document.getElementById('continueBtn').onclick = onContinue;
+
+  if(type === 'method'){
+    document.querySelectorAll('.method-card').forEach(el=>{
+      el.onclick = ()=>{ state.method = el.dataset.method; renderCard(); };
+    });
+  }
+
+  if(type === 'username'){
+    const input = document.getElementById('usernameInput');
+    const hint = document.getElementById('usernameHint');
+    let timer;
+    input.oninput = ()=>{
+      state.username = input.value;
+      clearTimeout(timer);
+      if(state.username.length < 3){
+        hint.className = 'input-hint';
+        hint.textContent = 'Mínimo de 3 caracteres.';
+        updateContinueState();
+        return;
+      }
+      hint.className = 'input-hint';
+      hint.textContent = 'Verificando disponibilidade…';
+      timer = setTimeout(()=>{
+        hint.className = 'input-hint ok';
+        hint.innerHTML = checkSvg() + ' Nome disponível!';
+        updateContinueState();
+      }, 450);
+      updateContinueState();
+    };
+    input.focus();
+  }
+
+  if(type === 'avatar'){
+    const grid = document.getElementById('avatarGrid');
+    grid.innerHTML = AVATARS.map((c,i)=>`
+      <div class="avatar-option ${state.avatarIndex===i && !state.avatarPhoto ? 'selected':''}" data-i="${i}"
+           style="background:linear-gradient(150deg, ${c.a}, ${c.b});">
+        ${avatarFaceSvg()}
+      </div>`).join('');
+    grid.querySelectorAll('.avatar-option').forEach(el=>{
+      el.onclick = ()=>{
+        state.avatarIndex = parseInt(el.dataset.i);
+        state.avatarPhoto = null;
+        renderCard();
+      };
+    });
+    updateAvatarPreview();
+
+    document.getElementById('uploadBtn').onclick = ()=> document.getElementById('fileInput').click();
+    document.getElementById('fileInput').onchange = (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        state.avatarPhoto = ev.target.result;
+        renderCard();
+      };
+      reader.readAsDataURL(file);
+    };
+  }
+
+  if(type === 'password'){
+    const input = document.getElementById('passwordInput');
+    const toggle = document.getElementById('pwToggle');
+    const fill = document.getElementById('pwMeterFill');
+    const hint = document.getElementById('pwHint');
+    input.oninput = ()=>{
+      state.password = input.value;
+      const sc = pwScore(state.password);
+      const pct = Math.min(100, (sc/4)*100);
+      fill.style.width = pct + '%';
+      if(sc<=1){fill.style.background='var(--danger)'; hint.textContent='Senha fraca — adicione mais caracteres.';}
+      else if(sc<=2){fill.style.background='var(--warn)'; hint.textContent='Senha média — tente misturar números e símbolos.';}
+      else {fill.style.background='var(--success)'; hint.textContent='Boa senha!';}
+      updateContinueState();
+    };
+    toggle.onclick = ()=>{
+      const isPw = input.type === 'password';
+      input.type = isPw ? 'text' : 'password';
+      toggle.textContent = isPw ? 'OCULTAR' : 'MOSTRAR';
+    };
+  }
+
+  if(type === 'nickname'){
+    document.getElementById('nicknameInput').oninput = (e)=>{ state.nickname = e.target.value; };
+  }
+}
+
+function pwScore(pw){
+  let sc = 0;
+  if(pw.length>=6) sc++;
+  if(pw.length>=10) sc++;
+  if(/[0-9]/.test(pw) && /[a-zA-Z]/.test(pw)) sc++;
+  if(/[^a-zA-Z0-9]/.test(pw)) sc++;
+  return sc;
+}
+
+function updateAvatarPreview(){
+  const prev = document.getElementById('avatarPreview');
+  if(!prev) return;
+  if(state.avatarPhoto){
+    prev.style.backgroundImage = `url(${state.avatarPhoto})`;
+    prev.innerHTML = '';
+  } else {
+    const c = AVATARS[state.avatarIndex];
+    prev.style.backgroundImage = '';
+    prev.style.background = `linear-gradient(150deg, ${c.a}, ${c.b})`;
+    prev.innerHTML = avatarFaceSvg();
+  }
+}
+
+function updateContinueState(){
+  const s = STEPS[state.step-1];
+  const btn = document.getElementById('continueBtn');
+  if(!btn) return;
+  let enabled = true;
+  if(s.type === 'method') enabled = !!state.method;
+  if(s.type === 'username') enabled = state.username.length >= 3;
+  if(s.type === 'password') enabled = state.password.length >= 6;
+  btn.disabled = !enabled;
+}
+
+/* ============== CONTINUE / GAME LOGIC ============== */
+function onContinue(){
+  const finishing = state.step === 5;
+  const completedIndex = state.step; // platform index that lights up
+  moveBallTo(completedIndex);
+  spawnCoinCollect(completedIndex);
+  state.coins += 20;
+  bumpCoinCount();
+
+  if(finishing){
+    setTimeout(()=>{ moveBallTo(6); }, 900);
+    setTimeout(()=>{ openChest(); }, 1750);
+  } else {
+    state.step++;
+    setTimeout(renderAll, 120);
+  }
+  document.getElementById('stepHud').textContent = Math.min(state.step, 5);
+}
+
+function renderAll(){
+  renderProgress();
+  renderCard();
+  document.getElementById('stepHud').textContent = state.step;
+}
+
+function moveBallTo(idx){
+  const ballPos = document.getElementById('ballPos');
+  const ballBody = document.getElementById('ballBody');
+  const targetY = idx===0 ? PLATFORM_Y[0]+30 : (idx<=5 ? PLATFORM_Y[idx]+36 : PLATFORM_Y.chest+50);
+  const targetX = idx===0 ? PLATFORM_X[0] : (idx<=5 ? PLATFORM_X[idx] : PLATFORM_X.chest);
+
+  ballPos.style.bottom = targetY + 'px';
+  ballPos.style.left = targetX;
+  ballBody.classList.remove('hopping');
+  // restart animation
+  void ballBody.offsetWidth;
+  ballBody.classList.add('hopping');
+  setTimeout(()=> ballBody.classList.remove('hopping'), 820);
+
+  panCameraTo(idx<=5 ? PLATFORM_Y[idx] : PLATFORM_Y.chest);
+}
+
+function panCameraTo(yFromBottom){
+  const stage = document.querySelector('.stage-frame');
+  const world = document.getElementById('world');
+  const h = stage.clientHeight;
+  let offset = yFromBottom - h/2;
+  offset = Math.max(0, offset);
+  world.style.transform = `translateY(${offset}px)`;
+}
+
+function spawnCoinCollect(idx){
+  if(idx<1 || idx>5) return;
+  const coin = document.getElementById('coin'+idx);
+  if(!coin || coin.classList.contains('collected')) return;
+  coin.classList.add('collected');
+  burstSparks(coin);
+  floatPlusText(coin, '+20');
+}
+
+function burstSparks(refEl){
+  const particles = document.getElementById('particles');
+  const stageRect = document.querySelector('.stage-frame').getBoundingClientRect();
+  const r = refEl.getBoundingClientRect();
+  const cx = r.left + r.width/2 - stageRect.left;
+  const cy = r.top + r.height/2 - stageRect.top;
+  for(let i=0;i<10;i++){
+    const sp = document.createElement('div');
+    sp.className = 'spark';
+    const ang = (Math.PI*2/10)*i + Math.random()*0.3;
+    const dist = 26 + Math.random()*22;
+    sp.style.setProperty('--sx', Math.cos(ang)*dist + 'px');
+    sp.style.setProperty('--sy', Math.sin(ang)*dist + 'px');
+    sp.style.left = cx + 'px';
+    sp.style.top = cy + 'px';
+    particles.appendChild(sp);
+    setTimeout(()=>sp.remove(), 760);
+  }
+}
+
+function floatPlusText(refEl, txt){
+  const particles = document.getElementById('particles');
+  const stageRect = document.querySelector('.stage-frame').getBoundingClientRect();
+  const r = refEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'float-text';
+  el.textContent = txt;
+  el.style.left = (r.left + r.width/2 - stageRect.left - 12) + 'px';
+  el.style.top = (r.top - stageRect.top - 6) + 'px';
+  particles.appendChild(el);
+  setTimeout(()=>el.remove(), 1050);
+}
+
+function bumpCoinCount(){
+  const el = document.getElementById('coinCount');
+  el.textContent = state.coins;
+  el.style.transform = 'scale(1.3)';
+  setTimeout(()=> el.style.transform = 'scale(1)', 180);
+}
+
+/* ============== CHEST + COMPLETE ============== */
+function openChest(){
+  const chest = document.getElementById('chest');
+  chest.classList.add('open');
+  burstSparks(chest);
+  setTimeout(()=>{
+    document.getElementById('completeOverlay').classList.add('show');
+    launchConfetti();
+  }, 500);
+}
+
+function launchConfetti(){
+  const layer = document.getElementById('confettiLayer');
+  const colors = ['#9B6BFF','#5EE6FF','#FFD24A','#FF6B81','#4ADE80'];
+  for(let i=0;i<70;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    const size = 6 + Math.random()*6;
+    c.style.width = size+'px';
+    c.style.height = (size*0.5)+'px';
+    c.style.background = colors[i % colors.length];
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.animationDuration = (2.4 + Math.random()*1.8) + 's';
+    c.style.animationDelay = (Math.random()*0.6) + 's';
+    c.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
+    layer.appendChild(c);
+    setTimeout(()=>c.remove(), 5000);
+  }
+}
+
+function resetDemo(){
+  state = {step:1, method:null, username:'', avatarIndex:0, avatarPhoto:null, password:'', nickname:'', coins:0};
+  document.getElementById('completeOverlay').classList.remove('show');
+  document.getElementById('chest').classList.remove('open');
+  document.getElementById('coinCount').textContent = '0';
+  document.querySelectorAll('.coin').forEach(c=>c.classList.remove('collected'));
+  document.getElementById('world').style.transform = 'translateY(0px)';
+  const ballPos = document.getElementById('ballPos');
+  ballPos.style.bottom = (PLATFORM_Y[0]+30) + 'px';
+  ballPos.style.left = PLATFORM_X[0];
+  renderAll();
+}
+
+/* ============== CLOUDS ============== */
+function makeClouds(){
+  const wrap = document.getElementById('clouds');
+  const specs = [
+    {top:'8%', w:120, h:40, dur:38, delay:0},
+    {top:'24%', w:90, h:30, dur:46, delay:-10},
+    {top:'46%', w:130, h:42, dur:42, delay:-22},
+    {top:'66%', w:100, h:34, dur:50, delay:-6},
+    {top:'85%', w:80, h:28, dur:34, delay:-16},
+  ];
+  wrap.innerHTML = '';
+  specs.forEach((s,i)=>{
+    const el = document.createElement('div');
+    el.className = 'cloud';
+    el.style.top = s.top;
+    el.style.width = s.w+'px';
+    el.style.height = s.h+'px';
+    el.style.left = '-160px';
+    el.style.setProperty('--dur', s.dur+'s');
+    el.style.animation = `drift ${s.dur}s linear ${s.delay}s infinite`;
+    wrap.appendChild(el);
+  });
+  if(!document.getElementById('cloudKeyframes')){
+    const style = document.createElement('style');
+    style.id = 'cloudKeyframes';
+    style.textContent = `@keyframes drift{from{transform:translateX(0);}to{transform:translateX(calc(100vw + 200px));}}`;
+    document.head.appendChild(style);
+  }
+}
+
+/* ============== INIT ============== */
+document.getElementById('restartBtn').onclick = resetDemo;
+window.addEventListener('resize', ()=>{
+  const idx = Math.max(0, state.step-1);
+  panCameraTo(idx===0 ? PLATFORM_Y[0] : PLATFORM_Y[idx]);
+});
+
+makeClouds();
+renderAll();
+panCameraTo(PLATFORM_Y[0]);
+</script>
+</body>
+</html>
